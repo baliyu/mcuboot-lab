@@ -72,9 +72,9 @@ The board has no console during MCUboot, so a refusal is seen only as "the app n
 | v1.0.1 signed and placed in slot 1, v1.0.0 in slot 0 | on | the board printed v1.0.1, so the update installed |
 | v0.9.0 signed and placed in slot 1, v1.0.1 in slot 0 | on | the board kept printing v1.0.1 (inferred: downgrade refused) |
 | One bit flipped in the app, at `0x20400` | on | no app (inferred: refused) |
-| Intact image signed with a different key | on | not yet run on this build |
 
-The good image was reflashed after each failure and ran every time, so the board itself was not the cause.
+
+In Build A the good image was reflashed after each failure and ran every time, so the board itself was not the cause. In Build B the good image ran before the corrupted image was flashed.
 
 ## What I measured
 
