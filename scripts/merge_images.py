@@ -43,7 +43,8 @@ def merge(mcuboot, app, update=None):
         end = SLOT1[1]
     else:
         end = out.maxaddr() + 1
-    return out.tobinstr(start=BASE, end=end - 1, pad=0xFF)
+    out.padding = 0xFF
+    return out.tobinstr(start=BASE, end=end - 1)
 
 
 def main(argv=None):

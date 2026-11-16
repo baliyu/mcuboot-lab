@@ -58,3 +58,10 @@ def test_cli_writes_image(tmp_path):
                   "--out", str(out)])
     assert rc == 0
     assert out.stat().st_size == 0x50000
+
+
+def test_merge_emits_no_warnings():
+    import warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        mi.merge(block(0x10000, b"\x01"), block(0x20000, b"\x02"))
