@@ -26,3 +26,15 @@ def test_readme_counts_match_the_csv_files():
 
 def test_readme_has_no_em_dash():
     assert "\u2014" not in (ROOT / "README.md").read_text()
+
+
+def test_readme_rerun_counts_match_the_rerun_csv_files():
+    r = []
+    for path in sorted((ROOT / "results").glob("rerun_*.csv")):
+        with open(path, newline="") as f:
+            r += list(csv.DictReader(f))
+    updated = sum(x["outcome"] == "updated" for x in r)
+    flash_fail = sum(x["outcome"] == "flash_fail" for x in r)
+    assert len(r) == updated + flash_fail
+    text = (ROOT / "README.md").read_text()
+    assert f"Rerun: {len(r)} trials: {updated} updated, {flash_fail} flash_fail" in text

@@ -110,7 +110,7 @@ Three sweeps were run: 100 ms steps from 0.4 to 3.2 s, 5 ms steps from 2.400 to 
 
 - **updated (177):** every trial from 0.6 s to 3.2 s that reached the cut ended with v1.0.1 running from slot 0. After cuts up to 2.44 s the app port came up about 3.4 s later, the same as an uninterrupted update, so the install was started again (inferred from the timing; I did not read the flash after a cut). After cuts from 2.46 s the port came up about 1.2 s later, so the update had already finished.
 - **bootloader (2):** cuts at 0.4 s and 0.5 s landed inside the double-tap window of the Arduino bootloader, so the board stayed in bootloader mode. This says nothing about MCUboot.
-- **flash_fail (2):** at 1.18 s and 1.58 s the flashing step failed before the cut. These points have no outcome and are not counted as passes.
+- **flash_fail (2):** at 1.18 s and 1.58 s the flashing step failed before the cut. These points have no outcome and are not counted as passes. Both points were rerun later (`results/rerun_*.csv`, not in the figure). Rerun: 7 trials: 6 updated, 1 flash_fail. 1.58 s passed (v1.0.1, port up at 3.41 s). 1.18 s failed at the flash step once more, then passed in 5 further trials (v1.0.1, port up at 3.40 to 3.43 s). I do not know why the flash step failed: the harness threw bossac output away then, and now prints it.
 
 ![Power cut during the update: seconds from the cut until the app port appeared, against cut time](figures/sweep_all.png)
 
@@ -152,7 +152,7 @@ The two do different jobs, so the sizes are not a fair contest. I have not looke
 ## Not tested
 
 - A real power cut or brownout. The test above used a reset, which does not model a falling supply voltage or a discharging capacitor.
-- Cuts in windows narrower than the step size (5 ms at best, 20 ms and 100 ms elsewhere). The two points at 1.18 s and 1.58 s failed at the flash step and have no outcome.
+- Cuts in windows narrower than the step size (5 ms at best, 20 ms and 100 ms elsewhere). The two points at 1.18 s and 1.58 s failed at the flash step in the main sweep and were rerun (see above).
 - Which step of MCUboot each cut hit. I did not separate "still starting" from "copying"; I only know the copy ends at about 2.455 s.
 - Swap-based updates with rollback. Build A was swap-using-offset, but its update never ran.
 - A wrong-key image on the overwrite-only build.
@@ -176,6 +176,7 @@ The two do different jobs, so the sizes are not a fair contest. I have not looke
 - The USB port can appear a moment before it can be opened. Reading it straight away gave "Access denied"; the harness retries up to 10 times.
 - Not every Kconfig warning stops the build. `MCUBOOT_UPDATE_FOOTER_SIZE` is dropped because `IMG_MANAGER` is not enabled, and the build still finishes.
 - A running score added up by hand in chat carried one arithmetic slip from step 3 to step 41. The tally is now computed by `scripts/scorecard.py` from `docs/scorecard.csv`.
+- A failed flash step is not a failed recovery, and a bare flash_fail row cannot say why. The harness now prints what bossac said, so the next failure will explain itself.
 
 ## Tools
 
