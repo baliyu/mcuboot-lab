@@ -46,6 +46,11 @@ def flash_ok(output):
     return "Verify successful" in output
 
 
+def flash_report(output, n=3):
+    lines = [x.strip() for x in output.splitlines() if x.strip()]
+    return " / ".join(lines[-n:]) if lines else "(no output)"
+
+
 def cut_times(start_us, stop_us, step_us):
     if step_us <= 0 or stop_us < start_us:
         raise ValueError("need step > 0 and stop >= start")
@@ -118,7 +123,11 @@ class WindowsIO:
         r = subprocess.run([self.bossac, f"--port={port}", "-U", "-i", "-e",
                             "-w", "-v", self.image],
                            capture_output=True, text=True)
-        return flash_ok(r.stdout + r.stderr)
+        text = r.stdout + r.stderr
+        ok = flash_ok(text)
+        if not ok:
+            print(f"  flash failed (exit {r.returncode}), bossac said: {flash_report(text)}")
+        return ok
 
     def cut(self, us):
         self.cutter.cut(us)
