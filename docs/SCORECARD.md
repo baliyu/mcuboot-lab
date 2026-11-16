@@ -2,7 +2,7 @@
 
 AI-assisted: drafted with Claude, checked by the author.
 
-113 hits, 21 misses and 5 not scored, across 41 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
+122 hits, 22 misses and 5 not scored, across 44 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
 
 | Step | Topic | Hits | Misses | Not scored |
 |---|---|---|---|---|
@@ -47,6 +47,9 @@ AI-assisted: drafted with Claude, checked by the author.
 | 39 | plot_sweep.py | 3 | 0 | 0 |
 | 40 | First figure and data | 3 | 0 | 0 |
 | 41 | requirements.txt and workflow | 2 | 0 | 0 |
+| 42 | Scorecard script and commit | 2 | 1 | 0 |
+| 43 | Fix the guard and commit | 3 | 0 | 0 |
+| 44 | 20 ms power-cut sweep | 4 | 0 | 0 |
 
 ## Misses
 
@@ -71,6 +74,7 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 32, U4 (75%): predicted the COM7 window would last 0.2 to 0.3 s; it lasted 0.17 s
 - Step 36, Y3 (70%): predicted every app_port_s would be 3.0 to 3.8; the 3.0 s cut gave 1.25 because the update had already finished
 - Step 38, AA3 (25%): predicted at least one row between the two clusters; there was none
+- Step 42, AF3 (75%): predicted a commit; my guard expected 2 AI-assisted lines but the script writes a third into its own report, so nothing was committed
 
 ## Not scored
 
@@ -84,3 +88,4 @@ AI-assisted: drafted with Claude, checked by the author.
 
 - Step 3: Running total quoted as 6 hits and 8 misses after steps 1 to 3; the correct figure was 9 and 5. Every later total inherited the slip until it was found at step 42.
 - Step 20: Not a prediction: merge_images.py used a deprecated pad argument that I did not predict; fixed in this step with identical output bytes.
+- Step 44: 2 of 131 cut points (1.18 s and 1.58 s) ended in flash_fail before the cut and have no outcome

@@ -40,3 +40,6 @@ step,topic,hits,misses,unscored,miss_notes,unscored_notes,other_notes
 39,plot_sweep.py,3,0,0,,,
 40,First figure and data,3,0,0,,,
 41,requirements.txt and workflow,2,0,0,,,
+42,Scorecard script and commit,2,1,0,"AF3 (75%): predicted a commit; my guard expected 2 AI-assisted lines but the script writes a third into its own report, so nothing was committed",,
+43,Fix the guard and commit,3,0,0,,,
+44,20 ms power-cut sweep,4,0,0,,,"2 of 131 cut points (1.18 s and 1.58 s) ended in flash_fail before the cut and have no outcome"
