@@ -73,3 +73,28 @@ def test_main_without_reset_never_touches_cutter(monkeypatch):
     monkeypatch.setattr(cutter, "open_cutter", boom)
     monkeypatch.setattr(portwatch, "comports", lambda: ["COM3"])
     assert portwatch.main(["--seconds", "0.1"]) == 0
+
+
+class FakeCutterWithCut:
+    def __init__(self):
+        self.cut_us = None
+
+    def reset(self):
+        pass
+
+    def cut(self, us):
+        self.cut_us = us
+
+
+def test_main_cut_sends_cut(monkeypatch):
+    fake = FakeCutterWithCut()
+    monkeypatch.setattr(cutter, "open_cutter", lambda port: fake)
+    monkeypatch.setattr(portwatch, "comports", lambda: ["COM3"])
+    assert portwatch.main(["--cut", "1500", "--seconds", "0.1"]) == 0
+    assert fake.cut_us == 1500
+
+
+def test_main_rejects_reset_and_cut_together():
+    import pytest
+    with pytest.raises(SystemExit):
+        portwatch.main(["--reset", "--cut", "5"])
