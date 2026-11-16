@@ -2,7 +2,7 @@
 
 AI-assisted: drafted with Claude, checked by the author.
 
-122 hits, 22 misses and 5 not scored, across 44 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
+164 hits, 27 misses and 12 not scored, across 59 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
 
 | Step | Topic | Hits | Misses | Not scored |
 |---|---|---|---|---|
@@ -50,6 +50,21 @@ AI-assisted: drafted with Claude, checked by the author.
 | 42 | Scorecard script and commit | 2 | 1 | 0 |
 | 43 | Fix the guard and commit | 3 | 0 | 0 |
 | 44 | 20 ms power-cut sweep | 4 | 0 | 0 |
+| 45 | 20 ms sweep figure and commit | 5 | 0 | 0 |
+| 46 | README and layout check | 3 | 1 | 0 |
+| 47 | First README update block | 0 | 0 | 5 |
+| 48 | Repo check after the cut-off paste | 3 | 0 | 0 |
+| 49 | README edits part 1 | 3 | 0 | 0 |
+| 50 | README comparison table edits | 3 | 0 | 0 |
+| 51 | README not tested and lessons edits | 3 | 0 | 0 |
+| 52 | README new section part 1 | 3 | 0 | 0 |
+| 53 | Find out why the window closed | 2 | 1 | 0 |
+| 54 | README new section part 2 | 4 | 0 | 0 |
+| 55 | README new section part 3 | 3 | 0 | 0 |
+| 56 | README test and commit | 1 | 3 | 0 |
+| 57 | Find the venv | 1 | 0 | 2 |
+| 58 | README test and commit again | 4 | 0 | 0 |
+| 59 | Push and CI | 4 | 0 | 0 |
 
 ## Misses
 
@@ -75,6 +90,11 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 36, Y3 (70%): predicted every app_port_s would be 3.0 to 3.8; the 3.0 s cut gave 1.25 because the update had already finished
 - Step 38, AA3 (25%): predicted at least one row between the two clusters; there was none
 - Step 42, AF3 (75%): predicted a commit; my guard expected 2 AI-assisted lines but the script writes a third into its own report, so nothing was committed
+- Step 46, AI4 (25%): predicted the README already mentioned 26,076 B; it only had the old 29,604 B
+- Step 53, AP2 (35%): predicted the README was 134 lines so step 52 never ran; it was 152
+- Step 56, AS1 (80%): predicted every check ok; the venv guard stopped the block first
+- Step 56, AS2 (75%): predicted 56 passed; pytest never ran
+- Step 56, AS3 (75%): predicted a commit; none was made
 
 ## Not scored
 
@@ -83,9 +103,20 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 28, Q2: no data
 - Step 28, Q3: no data
 - Step 28, Q4: no data
+- Step 47, AJ1: the terminal cut the paste off and the block never ran
+- Step 47, AJ2: same
+- Step 47, AJ3: same
+- Step 47, AJ4: same
+- Step 47, AJ5: same
+- Step 57, AT2: output cut off by a slow search of /mnt/c
+- Step 57, AT3: same
 
 ## Other errors that were not predictions
 
 - Step 3: Running total quoted as 6 hits and 8 misses after steps 1 to 3; the correct figure was 9 and 5. Every later total inherited the slip until it was found at step 42.
 - Step 20: Not a prediction: merge_images.py used a deprecated pad argument that I did not predict; fixed in this step with identical output bytes.
 - Step 44: 2 of 131 cut points (1.18 s and 1.58 s) ended in flash_fail before the cut and have no outcome
+- Step 52: scored from the README state because the output was lost when the window closed
+- Step 53: Every block I gave used exit in an interactive shell, which closed the WSL window whenever a guard tripped; blocks now run inside a bash wrapper
+- Step 56: I guessed the venv location wrong; it is /home/astro/zephyrproject/.venv
+- Step 59: AE3 from step 41 scored here: the first Actions run for 6710cac completed successfully
