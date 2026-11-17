@@ -149,6 +149,28 @@ python scripts/plot_sweep.py results/coarse_100ms.csv results/fine_2400_2500_5ms
 
 The two do different jobs, so the sizes are not a fair contest. I have not looked at what else is compiled into MCUboot. The two power-cut tests are not equivalent: the STM32 one used simulated cuts at 1,682 points of an install, this one used a hardware reset at 181 trials with steps of 100 ms, 20 ms and 5 ms.
 
+## Bill of materials and known vulnerabilities
+
+The scripts and documents in this part were written with AI assistance (Claude) and checked by me.
+
+[sbom/mcuboot-lab.spdx](sbom/mcuboot-lab.spdx) says what the two images contain. It is an SPDX 2.3 file made from a real build with Zephyr's `west spdx`, and `pyspdxtools` accepts it. It lists the modules that have at least one compiled source file in an image: Zephyr, the Nordic HAL, and MCUboot in the bootloader image only. The west manifest has 66 modules, so the plain `west spdx` output would name 63 components that are not in the firmware. Each component carries its git commit.
+
+To regenerate it, from WSL with the Zephyr workspace set up:
+
+    python scripts/make_sbom.py --build ~/sbom-work
+
+This takes about four minutes and gave the same components as the committed file. `west spdx` needs four things in this order: `west spdx --init` before the build, a sysbuild build with `BUILD_OUTPUT_META` switched on for both images (it adds a file and left the firmware binaries identical), and then a separate init and CMake run for each image folder. `make_sbom.py` does all of it, and the tests check the order of the commands with a fake runner.
+
+`python scripts/check_vulns.py` asks [OSV](https://osv.dev) about the commit of each component and compares the answers with [docs/triage.csv](docs/triage.csv). OSV answers by commit, not by version: four version-based queries returned nothing even for Zephyr v2.7.0, which has a known advisory. On 17 November 2026 it returned seven MCUboot advisories published on 13 November. Two are affected: the code is compiled into the bootloader image and the pinned revision has no fix. Five are not affected, because the feature each one needs (serial recovery, image encryption, measured boot, SHA-384 or SHA-512) is switched off in this image. Zephyr 4.4.2 and the Nordic HAL returned nothing. The checker exits 0 when every finding is in the triage file, 1 on a new finding, and 2 when OSV cannot be reached, so a network failure is never read as a clean result. The policy and the steps are in [SECURITY.md](SECURITY.md) and [docs/VULNERABILITY_HANDLING.md](docs/VULNERABILITY_HANDLING.md).
+
+What this does not show:
+
+- The statuses come from the OSV summaries, the image's final configuration and the list of compiled files. I did not review the code of each flaw.
+- OSV matches commit ranges and not configuration, so a finding can be a feature that is switched off here. That is why each one needs a status.
+- Licences in the SBOM are `NOASSERTION`, and it holds no hash of the built images.
+- Continuous integration runs the offline tests only. It does not run `west` or ask OSV. One extra test asks the real OSV and runs only with `OSV_LIVE=1`.
+- The two affected findings stay open until Zephyr's MCUboot revision contains the fixes.
+
 ## Not tested
 
 - A real power cut or brownout. The test above used a reset, which does not model a falling supply voltage or a discharging capacitor.

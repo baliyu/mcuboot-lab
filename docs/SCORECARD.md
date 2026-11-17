@@ -2,7 +2,7 @@
 
 AI-assisted: drafted with Claude, checked by the author.
 
-164 hits, 27 misses and 12 not scored, across 59 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
+236 hits, 54 misses and 19 not scored, across 64 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
 
 | Step | Topic | Hits | Misses | Not scored |
 |---|---|---|---|---|
@@ -65,6 +65,11 @@ AI-assisted: drafted with Claude, checked by the author.
 | 57 | Find the venv | 1 | 0 | 2 |
 | 58 | README test and commit again | 4 | 0 | 0 |
 | 59 | Push and CI | 4 | 0 | 0 |
+| 60 | SBOM: what west spdx needs | 18 | 21 | 4 |
+| 61 | SBOM: reading the output | 13 | 1 | 1 |
+| 62 | make_sbom.py, --build and the Zephyr commit | 23 | 2 | 0 |
+| 63 | Security policy and handling | 7 | 0 | 0 |
+| 64 | OSV checker and triage | 11 | 3 | 2 |
 
 ## Misses
 
@@ -95,6 +100,33 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 56, AS1 (80%): predicted every check ok; the venv guard stopped the block first
 - Step 56, AS2 (75%): predicted 56 passed; pytest never ran
 - Step 56, AS3 (75%): predicted a commit; none was made
+- Step 60, CD1 (half): west list works but my head -n 30 cut it off before MCUboot
+- Step 60, CD2: predicted no SBOM tool was installed; spdx-tools 0.8.5 and reuse 6.2.0 were
+- Step 60, CE2 (70%): predicted a build folder existed; there was none
+- Step 60, CE3 (75%): predicted tinycrypt was a separate module; it is not in the manifest, and mbedtls has two variants
+- Step 60, CG1 (75%): predicted the script builds under the Zephyr workspace; the caller picks the folder with --out
+- Step 60, CH4 (60%): predicted west spdx works on the app image after init and build; the walker failed
+- Step 60, CH5 (50%): same for the MCUboot image
+- Step 60, CI1 (35%): predicted west spdx works on the top build folder; it failed
+- Step 60, CI2 (65%): predicted a per-image init and CMake run is enough; replies appeared but the walker still failed
+- Step 60, CI3 (60%): predicted the file names Zephyr 4.4.2; no file was written
+- Step 60, CK1 (65%): predicted a zephyr.meta existed in the build; none did, because BUILD_OUTPUT_META was off
+- Step 60, CL1 (80%): predicted the walker builds the meta path from a nearby variable; it reads KERNEL_META_PATH from the CMake cache
+- Step 60, CL2 (55%): predicted a west command or script writes zephyr.meta; CMake does, under a Kconfig condition
+- Step 60, CM1 (75%): predicted kernel.cmake passes --meta-out; it only names the file
+- Step 60, CM2 (65%): predicted the write sits inside an if on a cache variable; the switch is the Kconfig option BUILD_OUTPUT_META
+- Step 60, CN1 (80%): predicted zephyr.meta appears after the rebuild; the rebuild never ran
+- Step 60, CN3 (75%): predicted west spdx works on the app image; it did not, there was no rebuild
+- Step 60, CN4 (70%): same for the MCUboot image
+- Step 60, CP1 (80%): predicted zephyr.meta appears; the rebuild failed again
+- Step 60, CP3 (75%): predicted west spdx works on the app image; there was still no meta file
+- Step 60, CP4 (70%): same for the MCUboot image
+- Step 61, CT4 (40%): predicted mbedtls-sources has compiled files in the MCUboot image; none do
+- Step 62, CV2 (50%): predicted all new tests pass first time; four failed on a fixture with an .invalid address
+- Step 62, CV4 (55%): predicted a built document validates first time; the validator rejects a made-up download location
+- Step 64, DE3 (60%): predicted the three current commits return 0 vulnerabilities; the MCUboot commit returned 7
+- Step 64, DH1 (35%): predicted a version-based OSV query works; all four forms returned nothing
+- Step 64, DJ1 (65%): predicted 94 passed; it was 93, I miscounted the new tests
 
 ## Not scored
 
@@ -110,6 +142,13 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 47, AJ5: same
 - Step 57, AT2: output cut off by a slow search of /mnt/c
 - Step 57, AT3: same
+- Step 60, CK2 (60%): the grep showed only the error line, so where the walker looks was not shown
+- Step 60, CK3 (70%): there was no file to read
+- Step 60, CN2 (85%): the hashes matched but nothing was rebuilt, so it proved nothing
+- Step 60, CP2 (85%): same, the rebuild had failed
+- Step 61, CR4 (60%): my head -n 8 cut the list before MCUboot could show
+- Step 64, DF2 (50%): only 1 of the 7 fix commits existed in the local clone, so it could not be scored
+- Step 64, DH2 (50%): the empty answers proved nothing, because the known-bad version also returned nothing
 
 ## Other errors that were not predictions
 
@@ -120,3 +159,5 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 53: Every block I gave used exit in an interactive shell, which closed the WSL window whenever a guard tripped; blocks now run inside a bash wrapper
 - Step 56: I guessed the venv location wrong; it is /home/astro/zephyrproject/.venv
 - Step 59: AE3 from step 41 scored here: the first Actions run for 6710cac completed successfully
+- Step 60: In steps 11 and 12 I blamed a missing source folder for the failed rebuild; the real cause was the missing --sysbuild flag, found in step 13
+- Step 64: The OSV records were read from titles and summaries and the image configuration, not from the code of each flaw
