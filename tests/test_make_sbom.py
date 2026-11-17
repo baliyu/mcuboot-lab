@@ -105,7 +105,7 @@ def test_written_file_reads_back(tmp_path):
                                   datetime(2026, 11, 17, 18, 0, 0)),
                  tmp_path / "s.spdx")
     names = {p.name for p in parse_file(str(tmp_path / "s.spdx")).packages}
-    assert names == {"mcuboot-lab", "mcuboot", "zephyr"}
+    assert names == {"mcuboot-lab-image", "mcuboot-image", "mcuboot", "zephyr"}
 
 
 def test_image_with_no_components_is_refused():
@@ -127,3 +127,22 @@ def test_cli_from_spdx_writes_a_file(tmp_path):
 def test_cli_refuses_a_missing_folder(tmp_path, capsys):
     assert m.main(["--from-spdx", str(tmp_path / "nope")]) == 1
     assert "refused" in capsys.readouterr().err
+
+
+def test_package_names_are_unique():
+    doc = m.build_document({"mcuboot-lab": [ZEP], "mcuboot": [MCU, ZEP]},
+                           datetime(2026, 11, 17, 18, 0, 0))
+    names = [p.name for p in doc.packages]
+    assert len(names) == len(set(names))
+
+
+def test_committed_sbom_is_valid_and_lists_the_components():
+    path = Path(__file__).resolve().parent.parent / "sbom" / "mcuboot-lab.spdx"
+    doc = parse_file(str(path))
+    assert validate_full_spdx_document(doc) == []
+    names = {p.name for p in doc.packages}
+    assert {"zephyr", "mcuboot", "hal_nordic",
+            "mcuboot-lab-image", "mcuboot-image"} <= names
+    mcu = [p for p in doc.packages if p.name == "mcuboot"][0]
+    assert len(mcu.version) == 40
+    assert "/home/" not in path.read_text()

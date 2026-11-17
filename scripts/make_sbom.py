@@ -72,7 +72,8 @@ def build_document(by_image, created):
         if not by_image[img]:
             raise ValueError(f"{img}: no compiled components found")
         img_id = f"SPDXRef-image-{_safe(img)}"
-        images.append(_package(img_id, img, None, SpdxNoAssertion()))
+        images.append(_package(img_id, f"{img}-image", None,
+                               SpdxNoAssertion()))
         rels.append(Relationship("SPDXRef-DOCUMENT",
                                  RelationshipType.DESCRIBES, img_id))
         for name, ver, dl in by_image[img]:
