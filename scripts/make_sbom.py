@@ -161,6 +161,42 @@ def run_recipe(repo, work, workspace, run=subprocess.run):
                 raise RuntimeError(f"exit {rc} from: {' '.join(cmd[:4])} (log {log})")
 
 
+ZEPHYR_URL = "git+https://github.com/zephyrproject-rtos/zephyr@"
+
+
+def zephyr_commit(workspace, version):
+    """The commit of the Zephyr checkout, which must sit exactly on tag v<version>."""
+    zdir = Path(workspace) / "zephyr"
+
+    def git(*args):
+        r = subprocess.run(["git", "-C", str(zdir), *args],
+                           capture_output=True, text=True)
+        return r.returncode, r.stdout.strip()
+
+    rc, tag = git("describe", "--tags", "--exact-match")
+    if rc != 0 or tag != f"v{version}":
+        raise ValueError(f"{zdir} is not at tag v{version} "
+                         f"(found {tag or 'no exact tag'})")
+    rc, commit = git("rev-parse", "HEAD")
+    if rc != 0 or len(commit) != 40:
+        raise ValueError(f"cannot read the Zephyr commit in {zdir}")
+    return commit
+
+
+def _zephyr_version(by_image):
+    found = {c[1] for comps in by_image.values() for c in comps if c[0] == "zephyr"}
+    if len(found) != 1:
+        raise ValueError(f"expected one Zephyr version, found {sorted(found)}")
+    return found.pop()
+
+
+def pin_zephyr(by_image, commit):
+    """Give Zephyr the same git+url@commit download location as the modules."""
+    return {img: [(n, v, ZEPHYR_URL + commit if (n == "zephyr" and d == NOASSERT) else d)
+                  for n, v, d in comps]
+            for img, comps in by_image.items()}
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     g = p.add_mutually_exclusive_group(required=True)
@@ -169,7 +205,7 @@ def main(argv=None):
     g.add_argument("--build", metavar="WORKDIR",
                    help="run the whole recipe, working in WORKDIR (outside the repo)")
     p.add_argument("--workspace", default=str(Path.home() / "zephyrproject"),
-                   help="west workspace to run west in")
+                   help="west workspace: the Zephyr commit is read from its\n                   zephyr folder, and --build runs west there")
     p.add_argument("--out", default=str(
         Path(__file__).resolve().parent.parent / "sbom" / "mcuboot-lab.spdx"))
     p.add_argument("--created", default=None,
@@ -184,6 +220,8 @@ def main(argv=None):
                        a.workspace)
             root = a.build
         by_image = read_images(root)
+        by_image = pin_zephyr(by_image, zephyr_commit(
+            a.workspace, _zephyr_version(by_image)))
         write_sbom(build_document(by_image, created), a.out)
     except (FileNotFoundError, ValueError, RuntimeError) as e:
         print(f"refused: {e}", file=sys.stderr)

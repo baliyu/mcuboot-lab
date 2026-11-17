@@ -2,6 +2,7 @@
 
 AI-assisted: drafted with Claude, checked by the author.
 """
+import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -118,9 +119,12 @@ def test_cli_from_spdx_writes_a_file(tmp_path):
     _write_zephyr(tmp_path / "spdx-mcuboot-lab" / "zephyr.spdx", False)
     _write_zephyr(tmp_path / "spdx-mcuboot" / "zephyr.spdx", True)
     out = tmp_path / "out" / "sbom.spdx"
+    commit = _fake_workspace(tmp_path / "ws")
     rc = m.main(["--from-spdx", str(tmp_path), "--out", str(out),
+                 "--workspace", str(tmp_path / "ws"),
                  "--created", "2026-11-17T18:00:00"])
     assert rc == 0 and out.is_file()
+    assert commit in out.read_text()
     assert "mcuboot" in {p.name for p in parse_file(str(out)).packages}
 
 
@@ -195,3 +199,53 @@ def test_run_recipe_runs_every_step_in_the_workspace(tmp_path):
 def test_cli_needs_one_mode():
     with pytest.raises(SystemExit):
         m.main([])
+
+
+def _fake_workspace(path):
+    z = Path(path) / "zephyr"
+    z.mkdir(parents=True)
+
+    def git(*args):
+        return subprocess.run(
+            ["git", "-C", str(z), "-c", "user.name=t", "-c", "user.email=t@example.com",
+             *args], check=True, capture_output=True, text=True).stdout.strip()
+
+    git("init", "-q")
+    git("commit", "-q", "--allow-empty", "-m", "x")
+    git("tag", "v4.4.2")
+    return git("rev-parse", "HEAD")
+
+
+def test_zephyr_commit_reads_the_tagged_commit(tmp_path):
+    commit = _fake_workspace(tmp_path / "ws")
+    assert m.zephyr_commit(tmp_path / "ws", "4.4.2") == commit
+    assert len(commit) == 40
+
+
+def test_zephyr_commit_refuses_a_different_tag(tmp_path):
+    _fake_workspace(tmp_path / "ws")
+    with pytest.raises(ValueError):
+        m.zephyr_commit(tmp_path / "ws", "4.5.0")
+
+
+def test_zephyr_commit_refuses_a_checkout_past_the_tag(tmp_path):
+    _fake_workspace(tmp_path / "ws")
+    subprocess.run(["git", "-C", str(tmp_path / "ws" / "zephyr"), "-c", "user.name=t",
+                    "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty",
+                    "-m", "y"], check=True, capture_output=True)
+    with pytest.raises(ValueError):
+        m.zephyr_commit(tmp_path / "ws", "4.4.2")
+
+
+def test_pin_zephyr_sets_only_zephyr_and_keeps_the_modules():
+    out = m.pin_zephyr({"a": [ZEP, MCU]}, "ab" * 20)
+    assert out["a"][0] == ("zephyr", "4.4.2", m.ZEPHYR_URL + "ab" * 20)
+    assert out["a"][1] == MCU
+
+
+def test_committed_sbom_pins_zephyr_to_a_commit():
+    path = Path(__file__).resolve().parent.parent / "sbom" / "mcuboot-lab.spdx"
+    zeph = [p for p in parse_file(str(path)).packages if p.name == "zephyr"][0]
+    loc = str(zeph.download_location)
+    assert loc.startswith(m.ZEPHYR_URL)
+    assert len(loc[len(m.ZEPHYR_URL):]) == 40

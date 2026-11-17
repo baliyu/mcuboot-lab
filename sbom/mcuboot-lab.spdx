@@ -3,11 +3,11 @@ SPDXVersion: SPDX-2.3
 DataLicense: CC0-1.0
 SPDXID: SPDXRef-DOCUMENT
 DocumentName: mcuboot-lab-firmware
-DocumentNamespace: https://github.com/baliyu/mcuboot-lab/sbom/20261117T182201Z
+DocumentNamespace: https://github.com/baliyu/mcuboot-lab/sbom/20261117T185047Z
 
 ## Creation Information
 Creator: Tool: mcuboot-lab make_sbom.py
-Created: 2026-11-17T18:22:01Z
+Created: 2026-11-17T18:50:47Z
 
 ## Package Information
 PackageName: mcuboot-image
@@ -51,7 +51,7 @@ PackageCopyrightText: NOASSERTION
 PackageName: zephyr
 SPDXID: SPDXRef-component-zephyr-4.4.2
 PackageVersion: 4.4.2
-PackageDownloadLocation: NOASSERTION
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/zephyr@dccb09599635bdff17633fa7e9dab014b91dce90
 FilesAnalyzed: false
 PackageLicenseConcluded: NOASSERTION
 PackageLicenseDeclared: NOASSERTION
