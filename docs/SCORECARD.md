@@ -2,7 +2,7 @@
 
 AI-assisted: drafted with Claude, checked by the author.
 
-236 hits, 54 misses and 19 not scored, across 64 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
+246 hits, 55 misses and 19 not scored, across 65 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
 
 | Step | Topic | Hits | Misses | Not scored |
 |---|---|---|---|---|
@@ -70,6 +70,7 @@ AI-assisted: drafted with Claude, checked by the author.
 | 62 | make_sbom.py, --build and the Zephyr commit | 23 | 2 | 0 |
 | 63 | Security policy and handling | 7 | 0 | 0 |
 | 64 | OSV checker and triage | 11 | 3 | 2 |
+| 65 | Merge and CI on main | 10 | 1 | 0 |
 
 ## Misses
 
@@ -127,6 +128,7 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 64, DE3 (60%): predicted the three current commits return 0 vulnerabilities; the MCUboot commit returned 7
 - Step 64, DH1 (35%): predicted a version-based OSV query works; all four forms returned nothing
 - Step 64, DJ1 (65%): predicted 94 passed; it was 93, I miscounted the new tests
+- Step 65, DL2 (70%): predicted the scorecard notes columns hold free text with no required format; a row needs one note per miss and per unscored item, separated by a vertical bar, and the script refuses a row whose counts and notes disagree
 
 ## Not scored
 
