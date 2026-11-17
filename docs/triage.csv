@@ -1,0 +1,8 @@
+id,component,status,reason,checked
+CVE-2026-127915,mcuboot,affected,tlv.c is compiled and always used; no fix commit in the pinned revision; waiting for a newer Zephyr MCUboot revision,2026-11-17
+CVE-2026-127916,mcuboot,affected,image_validate.c and bootutil_img_hash.c are compiled; no fix commit in the pinned revision; waiting for a newer Zephyr MCUboot revision,2026-11-17
+CVE-2026-128091,mcuboot,not_affected,CONFIG_BOOT_ENCRYPT_IMAGE is not set and no TinyCrypt module is in the SBOM,2026-11-17
+CVE-2026-16659,mcuboot,not_affected,CONFIG_MCUBOOT_SERIAL and CONFIG_BOOT_ENCRYPT_IMAGE are not set,2026-11-17
+CVE-2026-16662,mcuboot,not_affected,no measured-boot option is in the image config and no measured-boot file is compiled,2026-11-17
+CVE-2026-16664,mcuboot,not_affected,CONFIG_MCUBOOT_SERIAL is not set,2026-11-17
+CVE-2026-16671,mcuboot,not_affected,"only CONFIG_BOOT_IMG_HASH_ALG_SHA256 is enabled, no SHA-384 or SHA-512",2026-11-17

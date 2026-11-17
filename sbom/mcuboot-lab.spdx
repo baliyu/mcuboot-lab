@@ -1,0 +1,68 @@
+## Document Information
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: mcuboot-lab-firmware
+DocumentNamespace: https://github.com/baliyu/mcuboot-lab/sbom/20261117T185047Z
+
+## Creation Information
+Creator: Tool: mcuboot-lab make_sbom.py
+Created: 2026-11-17T18:50:47Z
+
+## Package Information
+PackageName: mcuboot-image
+SPDXID: SPDXRef-image-mcuboot
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+
+## Package Information
+PackageName: mcuboot-lab-image
+SPDXID: SPDXRef-image-mcuboot-lab
+PackageDownloadLocation: NOASSERTION
+FilesAnalyzed: false
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+
+## Package Information
+PackageName: hal_nordic
+SPDXID: SPDXRef-component-hal-nordic-44fd3d44b15c
+PackageVersion: 44fd3d44b15cb75f80a25b4679f91d2787e28664
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/hal_nordic@44fd3d44b15cb75f80a25b4679f91d2787e28664
+FilesAnalyzed: false
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+
+## Package Information
+PackageName: mcuboot
+SPDXID: SPDXRef-component-mcuboot-6d3b3d2c38ab
+PackageVersion: 6d3b3d2c38ab20c242e5b9abb04d050086383eb2
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/mcuboot@6d3b3d2c38ab20c242e5b9abb04d050086383eb2
+FilesAnalyzed: false
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+
+## Package Information
+PackageName: zephyr
+SPDXID: SPDXRef-component-zephyr-4.4.2
+PackageVersion: 4.4.2
+PackageDownloadLocation: git+https://github.com/zephyrproject-rtos/zephyr@dccb09599635bdff17633fa7e9dab014b91dce90
+FilesAnalyzed: false
+PackageLicenseConcluded: NOASSERTION
+PackageLicenseDeclared: NOASSERTION
+PackageCopyrightText: NOASSERTION
+
+## Relationships
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-image-mcuboot
+Relationship: SPDXRef-image-mcuboot CONTAINS SPDXRef-component-hal-nordic-44fd3d44b15c
+Relationship: SPDXRef-image-mcuboot CONTAINS SPDXRef-component-mcuboot-6d3b3d2c38ab
+Relationship: SPDXRef-image-mcuboot CONTAINS SPDXRef-component-zephyr-4.4.2
+Relationship: SPDXRef-DOCUMENT DESCRIBES SPDXRef-image-mcuboot-lab
+Relationship: SPDXRef-image-mcuboot-lab CONTAINS SPDXRef-component-hal-nordic-44fd3d44b15c
+Relationship: SPDXRef-image-mcuboot-lab CONTAINS SPDXRef-component-zephyr-4.4.2
+
