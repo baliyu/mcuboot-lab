@@ -146,3 +146,52 @@ def test_committed_sbom_is_valid_and_lists_the_components():
     mcu = [p for p in doc.packages if p.name == "mcuboot"][0]
     assert len(mcu.version) == 40
     assert "/home/" not in path.read_text()
+
+
+REPO = Path(__file__).resolve().parent.parent
+
+
+class _Done:
+    def __init__(self, rc):
+        self.returncode = rc
+
+
+def test_recipe_runs_init_before_build_with_the_meta_flags():
+    cmds = m.recipe_commands(Path("s"), Path("b"), Path("w"))
+    assert cmds[0][:3] == ["west", "spdx", "--init"]
+    build = cmds[1]
+    assert build[:2] == ["west", "build"] and "--sysbuild" in build
+    assert build[build.index("-p") + 1] == "auto"
+    assert all(flag in build for flag in m.META_FLAGS)
+    for img in m.IMAGES:
+        assert any(c[:2] == ["west", "spdx"] and c[-1].endswith("spdx-" + img)
+                   for c in cmds)
+
+
+def test_run_recipe_stops_at_first_failure(tmp_path):
+    calls = []
+
+    def fake(cmd, **kw):
+        calls.append(cmd)
+        return _Done(1 if len(calls) == 2 else 0)
+
+    with pytest.raises(RuntimeError):
+        m.run_recipe(REPO, tmp_path, tmp_path, run=fake)
+    assert len(calls) == 2
+
+
+def test_run_recipe_runs_every_step_in_the_workspace(tmp_path):
+    seen = []
+
+    def fake(cmd, **kw):
+        seen.append(kw["cwd"])
+        return _Done(0)
+
+    m.run_recipe(REPO, tmp_path, tmp_path / "ws", run=fake)
+    assert len(seen) == len(m.recipe_commands("s", "b", "w"))
+    assert set(seen) == {str(tmp_path / "ws")}
+
+
+def test_cli_needs_one_mode():
+    with pytest.raises(SystemExit):
+        m.main([])

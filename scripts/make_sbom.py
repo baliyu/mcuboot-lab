@@ -7,6 +7,9 @@ keeps only the modules that have at least one compiled source file in an
 image, so the bill of materials describes the firmware and not the SDK.
 """
 import argparse
+import re
+import shutil
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -18,6 +21,8 @@ from spdx_tools.spdx.parser.parse_anything import parse_file
 from spdx_tools.spdx.validation.document_validator import \
     validate_full_spdx_document
 from spdx_tools.spdx.writer.write_anything import write_file
+
+import build_images
 
 IMAGES = ("mcuboot-lab", "mcuboot")
 NAMESPACE = "https://github.com/baliyu/mcuboot-lab/sbom/"
@@ -102,10 +107,69 @@ def write_sbom(doc, path):
     write_file(doc, str(path), validate=False)
 
 
+META_FLAGS = ["-Dmcuboot-lab_CONFIG_BUILD_OUTPUT_META=y",
+              "-Dmcuboot_CONFIG_BUILD_OUTPUT_META=y"]
+
+
+def recipe_commands(src, build, work):
+    """The commands, in order, that make west spdx work on a sysbuild build.
+
+    west spdx needs a query file before the build (init), the module list
+    that BUILD_OUTPUT_META writes, and a separate init and CMake run for each
+    image folder, because sysbuild configures every image on its own.
+    -p auto, not -p always: a pristine build would erase the init file.
+    """
+    src, build, work = Path(src), Path(build), Path(work)
+    cmds = [["west", "spdx", "--init", "-d", str(build)],
+            ["west", "build", "-p", "auto", "-b", build_images.BOARD,
+             "--sysbuild", "-d", str(build), str(src), "--", *META_FLAGS]]
+    for img in IMAGES:
+        d = build / img
+        cmds += [["west", "spdx", "--init", "-d", str(d)],
+                 ["west", "build", "-d", str(d), "--cmake-only"],
+                 ["west", "spdx", "-d", str(d), "-s", str(work / f"spdx-{img}")]]
+    return cmds
+
+
+def _repo_version(repo):
+    text = (Path(repo) / "VERSION").read_text()
+    parts = []
+    for key in ("VERSION_MAJOR", "VERSION_MINOR", "PATCHLEVEL"):
+        m = re.search(rf"^{key}\s*=\s*(\d+)", text, flags=re.M)
+        if not m:
+            raise ValueError(f"{key} not found in VERSION")
+        parts.append(m.group(1))
+    return ".".join(parts)
+
+
+def run_recipe(repo, work, workspace, run=subprocess.run):
+    work = Path(work)
+    build = work / "build"
+    shutil.rmtree(build, ignore_errors=True)
+    for img in IMAGES:
+        shutil.rmtree(work / f"spdx-{img}", ignore_errors=True)
+    work.mkdir(parents=True, exist_ok=True)
+    src = build_images.prepare_source(repo, work / "src", _repo_version(repo))
+    log = work / "sbom.log"
+    with open(log, "w") as f:
+        for cmd in recipe_commands(src, build, work):
+            f.write("$ " + " ".join(cmd) + "\n")
+            f.flush()
+            rc = run(cmd, cwd=str(workspace), stdout=f,
+                     stderr=subprocess.STDOUT).returncode
+            if rc != 0:
+                raise RuntimeError(f"exit {rc} from: {' '.join(cmd[:4])} (log {log})")
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--from-spdx", required=True,
+    g = p.add_mutually_exclusive_group(required=True)
+    g.add_argument("--from-spdx",
                    help="folder holding spdx-mcuboot-lab/ and spdx-mcuboot/")
+    g.add_argument("--build", metavar="WORKDIR",
+                   help="run the whole recipe, working in WORKDIR (outside the repo)")
+    p.add_argument("--workspace", default=str(Path.home() / "zephyrproject"),
+                   help="west workspace to run west in")
     p.add_argument("--out", default=str(
         Path(__file__).resolve().parent.parent / "sbom" / "mcuboot-lab.spdx"))
     p.add_argument("--created", default=None,
@@ -114,9 +178,14 @@ def main(argv=None):
     created = (datetime.fromisoformat(a.created) if a.created else
                datetime.now(timezone.utc).replace(microsecond=0, tzinfo=None))
     try:
-        by_image = read_images(a.from_spdx)
+        root = a.from_spdx
+        if a.build:
+            run_recipe(Path(__file__).resolve().parent.parent, a.build,
+                       a.workspace)
+            root = a.build
+        by_image = read_images(root)
         write_sbom(build_document(by_image, created), a.out)
-    except (FileNotFoundError, ValueError) as e:
+    except (FileNotFoundError, ValueError, RuntimeError) as e:
         print(f"refused: {e}", file=sys.stderr)
         return 1
     for img, comps in by_image.items():
