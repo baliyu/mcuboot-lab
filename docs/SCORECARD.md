@@ -2,7 +2,7 @@
 
 AI-assisted: drafted with Claude, checked by the author.
 
-246 hits, 55 misses and 19 not scored, across 65 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
+263 hits, 62 misses and 19 not scored, across 66 steps. The tally is computed by scripts/scorecard.py from docs/scorecard.csv, and every miss is written down below.
 
 | Step | Topic | Hits | Misses | Not scored |
 |---|---|---|---|---|
@@ -71,6 +71,7 @@ AI-assisted: drafted with Claude, checked by the author.
 | 63 | Security policy and handling | 7 | 0 | 0 |
 | 64 | OSV checker and triage | 11 | 3 | 2 |
 | 65 | Merge and CI on main | 10 | 1 | 0 |
+| 66 | Update-flow state diagram | 17 | 7 | 0 |
 
 ## Misses
 
@@ -129,6 +130,13 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 64, DH1 (35%): predicted a version-based OSV query works; all four forms returned nothing
 - Step 64, DJ1 (65%): predicted 94 passed; it was 93, I miscounted the new tests
 - Step 65, DL2 (70%): predicted the scorecard notes columns hold free text with no required format; a row needs one note per miss and per unscored item, separated by a vertical bar, and the script refuses a row whose counts and notes disagree
+- Step 66, UF3 (80%): predicted the docs mention swap and revert; the lines I read show swap but not revert (only rollback, under not tested)
+- Step 66, UF4 (55%): predicted the docs mention image_ok; the lines I read do not show it
+- Step 66, UF5 (70%): predicted the power-cut section lists at least 3 outcome categories besides updated; it lists 2 (bootloader and flash_fail)
+- Step 66, UF7 (80%): predicted the power-cut section describes a v1.0.0-still-running outcome; all 177 updated trials ended on v1.0.1 and none left the old version running
+- Step 66, UG1 (70%): predicted docs/scorecard.csv has id, statement, chance and outcome columns; it has one row per step with hit and miss counts and notes
+- Step 66, UG2 (70%): predicted scorecard.py runs with no arguments; it needs the csv path and --out
+- Step 66, UG3 (90%): predicted the repo's tests pass; pytest is not in the base Python, so the run did not happen there
 
 ## Not scored
 
@@ -163,3 +171,4 @@ AI-assisted: drafted with Claude, checked by the author.
 - Step 59: AE3 from step 41 scored here: the first Actions run for 6710cac completed successfully
 - Step 60: In steps 11 and 12 I blamed a missing source folder for the failed rebuild; the real cause was the missing --sysbuild flag, found in step 13
 - Step 64: The OSV records were read from titles and summaries and the image configuration, not from the code of each flaw
+- Step 66: Predictions made while drawing docs/UPDATE_FLOW.md (overwrite-only build only) and while adding this row
