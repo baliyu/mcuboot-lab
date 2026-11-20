@@ -42,6 +42,8 @@ The Arduino bootloader's flasher writes at `0x10000` by itself, so I flash witho
 
 An update is prepared with `imgtool sign --pad --slot-size 0x20000`, which also writes the "update waiting" marker at the end of the slot. The result is placed at `0x40000`.
 
+The update flow, with each step marked tested or inferred, is drawn in [docs/UPDATE_FLOW.md](docs/UPDATE_FLOW.md).
+
 Then, with the board in bootloader mode (double-tap RESET until the orange LED fades), from PowerShell:
 
 ```
